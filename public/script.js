@@ -24,16 +24,23 @@ for (let i = 0; i < numStars; i++) {
 
 // AI Image Generator
 async function generate() {
-  const prompt = document.getElementById("prompt").value.trim();
-  const model = document.getElementById("model").value;
+  const promptInput = document.getElementById("prompt");
+  const modelSelect = document.getElementById("model");
+  const inputGroup = document.querySelector(".input-group");
   const resultDiv = document.getElementById("result");
+  const prompt = promptInput.value.trim();
+  const model = modelSelect.value;
 
   if (!prompt) {
-    resultDiv.innerHTML = "<div>⚠️ Prompt tidak boleh kosong.</div>";
+    resultDiv.innerHTML = "<div>Prompt tidak boleh kosong.</div>";
     return;
   }
 
-  resultDiv.innerHTML = "<div>⏳ Generating image... Tunggu sebentar.</div>";
+  // Pindahkan input ke atas card
+  inputGroup.style.order = "-1";
+  inputGroup.style.transition = "all 0.3s ease";
+
+  resultDiv.innerHTML = "<div>Generating image... Tunggu sebentar.</div>";
 
   try {
     const res = await fetch("/api/generate", {
@@ -43,7 +50,12 @@ async function generate() {
     });
 
     if (!res.ok) {
-      resultDiv.innerHTML = "<div>❌ Error generating image. Coba lagi.</div>";
+      const text = await res.text(); // ambil response dari server
+      resultDiv.innerHTML = `
+        <div>Error generating image</div>
+        <div>Status: ${res.status} ${res.statusText}</div>
+        <div>Response: ${text}</div>
+      `;
       return;
     }
 
@@ -53,9 +65,15 @@ async function generate() {
     resultDiv.innerHTML = `
       <img src="${url}" alt="Generated Image" />
       <br>
-      <a href="${url}" download="ai-image.png" class="download-btn">⬇ Download Gambar</a>
+      <a href="${url}" download="ai-image.png" class="download-btn">Download Gambar</a>
     `;
+
+    // Smooth scroll ke hasil gambar
+    resultDiv.scrollIntoView({ behavior: "smooth" });
   } catch (err) {
-    resultDiv.innerHTML = "<div>❌ Error: " + err.message + "</div>";
+    resultDiv.innerHTML = `
+      <div>Terjadi error saat proses fetch API</div>
+      <div>Message: ${err.message}</div>
+    `;
   }
 }
