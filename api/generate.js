@@ -1,10 +1,12 @@
+import translate from "@vitalets/google-translate-api";
+
 export const config = {
-  runtime: "edge",
+  runtime: "edge", 
 };
 
 export default async function handler(req) {
   try {
-    const { model, prompt } = await req.json();
+    let { model, prompt } = await req.json();
 
     if (!model || !prompt) {
       return new Response(
@@ -13,10 +15,12 @@ export default async function handler(req) {
       );
     }
 
-    // URL API siputzx
+    // Translate ke bahasa Inggris jika bukan Inggris
+    const detect = await translate(prompt, { to: "en" });
+    prompt = detect.text; // hasil translate
+
     const url = `https://api.siputzx.my.id/api/ai/${model}?prompt=${encodeURIComponent(prompt)}`;
 
-    // Fetch binary image langsung
     const resp = await fetch(url);
     if (!resp.ok) {
       return new Response(
@@ -25,7 +29,7 @@ export default async function handler(req) {
       );
     }
 
-    const arrayBuffer = await resp.arrayBuffer(); // ambil sebagai binary
+    const arrayBuffer = await resp.arrayBuffer();
     return new Response(arrayBuffer, {
       status: 200,
       headers: {
