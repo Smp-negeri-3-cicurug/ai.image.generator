@@ -1,5 +1,5 @@
 export const config = {
-  runtime: "edge", // tetap cepat
+  runtime: "edge",
 };
 
 export default async function handler(req) {
@@ -13,14 +13,14 @@ export default async function handler(req) {
       );
     }
 
-    // translate prompt ke bahasa Inggris
-    const translateRes = await fetch("https://libretranslate.com/translate", {
+    // Translate prompt ke bahasa Inggris
+    const translateRes = await fetch("https://libretranslate.de/translate", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         q: prompt,
-        source: "auto", // detect otomatis bahasa
-        target: "en",   // terjemahkan ke Inggris
+        source: "auto",
+        target: "en",
         format: "text"
       }),
     });
@@ -35,7 +35,7 @@ export default async function handler(req) {
     const translateData = await translateRes.json();
     const translatedPrompt = translateData.translatedText;
 
-    // kirim prompt yang sudah diterjemahkan ke API siputzx
+    // Kirim prompt yang sudah diterjemahkan ke API siputzx
     const targetUrl = `https://api.siputzx.my.id/api/ai/${model}?prompt=${encodeURIComponent(translatedPrompt)}`;
     const resp = await fetch(targetUrl);
 
@@ -46,7 +46,7 @@ export default async function handler(req) {
       );
     }
 
-    // forward gambar langsung
+    // Forward gambar langsung ke client
     return new Response(resp.body, {
       status: 200,
       headers: {
@@ -61,4 +61,4 @@ export default async function handler(req) {
       { status: 500, headers: { "Content-Type": "application/json" } }
     );
   }
-}
+      }
