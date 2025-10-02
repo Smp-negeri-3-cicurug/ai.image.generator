@@ -1,0 +1,20 @@
+{
+  "name": "ai-image-generator",
+  "version": "1.0.0",
+  "description": "A simple AI image generator with Flux & MagicStudio, built with Vercel Edge Functions.",
+  "main": "api/generate.js",
+  "scripts": {
+    "start": "vercel dev",
+    "deploy": "vercel --prod"
+  },
+  "keywords": [
+    "ai",
+    "image-generator",
+    "flux",
+    "magicstudio",
+    "vercel",
+    "edge-functions"
+  ],
+  "author": "Ditzz",
+  "license": "ISC"
+}
