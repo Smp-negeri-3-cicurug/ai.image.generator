@@ -5,6 +5,7 @@
   box-sizing: border-box;
 }
 
+/* Variables */
 :root {
   --color-darkest: #020617;
   --color-dark: #0f172a;
@@ -14,6 +15,7 @@
   --color-gradient-start: #3b82f6;
   --color-gradient-end: #2563eb;
   --color-input-bg: rgba(255, 255, 255, 0.1);
+  --color-accent-green: #22c55e;
 
   --spacing-sm: 0.5rem;
   --spacing-md: 1rem;
@@ -25,18 +27,152 @@
   --radius-xl: 1rem;
 }
 
+/* Body & background */
+body {
+  background: radial-gradient(circle at top, var(--color-dark), var(--color-darkest));
+  color: var(--color-text);
+  font-family: "Inter", "Segoe UI", sans-serif;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-xl);
+  position: relative;
+  overflow-x: hidden;
+  transition: all 0.5s ease;
+}
+
+body.generated {
+  justify-content: flex-start;
+  padding-top: 2rem;
+  transition: all 0.5s ease;
+}
+
+/* Stars Container & Effect */
+.stars {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  overflow: hidden;
+}
+
+.star {
+  position: absolute;
+  border-radius: 50%;
+  background: white;
+  opacity: 0.8;
+  animation: twinkle 2s infinite ease-in-out;
+}
+
+@keyframes twinkle {
+  0%, 100% { opacity: 0.2; transform: scale(0.8); }
+  50%      { opacity: 1; transform: scale(1.2); }
+}
+
+/* Title */
+h1 {
+  font-size: 2.5rem;
+  margin: var(--spacing-lg) 0;
+  background: linear-gradient(90deg, var(--color-accent-blue), var(--color-gradient-start), var(--color-accent-purple));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 800;
+  text-align: center;
+}
+
+/* Card */
+.card {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-xl);
+  /* PERUBAHAN: Lebar card diperlebar dari 750px menjadi 900px */
+  max-width: 900px; 
+  width: 100%;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: transform 0.3s ease, margin-top 0.5s ease;
+}
+
+.card:hover {
+  transform: translateY(-3px);
+}
+
+/* Form Elements Styling */
+input, select, button {
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  font-size: 1rem;
+  padding: var(--spacing-md) var(--spacing-lg);
+  background: var(--color-input-bg);
+  color: var(--color-text);
+  transition: 0.3s;
+}
+
+input:focus, select:focus {
+  border-color: var(--color-accent-blue);
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* Input group (Input & Select) */
+.input-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-md);
+  justify-content: center;
+  width: 100%;
+  margin-bottom: var(--spacing-md);
+}
+
+input, select {
+  flex: 1 1 100%;
+  min-width: 200px;
+}
+
+/* --- Button Group (Generate & Reset) --- */
+.button-group {
+    display: flex; /* Membuat tombol sejajar */
+    gap: var(--spacing-md);
+    justify-content: center;
+    width: 100%;
+    margin-top: var(--spacing-md);
+}
+
+/* General Button Styling */
+button {
+  cursor: pointer;
+  font-weight: 700;
+  border: none;
+  transition: all 0.3s ease;
+  color: white;
+}
+
 /* Tombol Generate (biru → ungu) */
 .generate-btn {
   background: linear-gradient(135deg, var(--color-accent-blue), var(--color-accent-purple));
-  color: white;
-  font-weight: 700;
-  cursor: pointer;
-  border: none;
-  border-radius: var(--radius-md);
-  padding: var(--spacing-sm) var(--spacing-lg);
-  transition: all 0.3s ease;
 }
 
+/* Tombol Reset (biru → hijau gradasi) */
+.reset-btn {
+  background: linear-gradient(135deg, var(--color-accent-blue), var(--color-accent-green));
+}
+
+/* Ukuran Tombol yang Disesuaikan (TETAP KECIL) */
+.button-group .generate-btn,
+.button-group .reset-btn {
+    flex: 0 1 180px; 
+    padding: var(--spacing-md) var(--spacing-xl);
+}
+
+/* Hover & Active Effects */
 .generate-btn:hover {
   transform: translateY(-3px);
   box-shadow: 0 8px 25px rgba(56, 189, 248, 0.6);
@@ -46,7 +182,18 @@
   transform: translateY(-1px);
   box-shadow: 0 4px 15px rgba(99, 102, 241, 0.5);
 }
-/* Spinner container */
+
+.reset-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(34, 197, 94, 0.6);
+}
+
+.reset-btn:active {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 15px rgba(56, 189, 248, 0.5);
+}
+
+/* Spinner */
 .spinner-container {
   display: flex;
   flex-direction: column;
@@ -71,158 +218,7 @@
   to { transform: rotate(360deg); }
 }
 
-/* Reset button */
-/* Tombol Reset (biru → hijau gradasi) */
-.reset-btn {
-  background: linear-gradient(135deg, var(--color-accent-blue), #22c55e); /* biru → hijau */
-  color: white;
-  font-weight: 700;
-  cursor: pointer;
-  border: none;
-  border-radius: var(--radius-md);
-  padding: var(--spacing-sm) var(--spacing-lg);
-  transition: all 0.3s ease;
-}
-
-.reset-btn:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 25px rgba(34, 197, 94, 0.6); /* shadow hijau */
-}
-
-.reset-btn:active {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 15px rgba(56, 189, 248, 0.5); /* shadow biru */
-}
-
-/* Body & background */
-body {
-  background: radial-gradient(circle at top, var(--color-dark), var(--color-darkest));
-  color: var(--color-text);
-  font-family: "Inter", "Segoe UI", sans-serif;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center; /* Tengah sebelum generate */
-  padding: var(--spacing-xl);
-  position: relative;
-  overflow-x: hidden;
-  transition: all 0.5s ease;
-}
-
-body.generated {
-  justify-content: flex-start;
-  padding-top: 2rem;
-  transition: all 0.5s ease;
-}
-/* Stars container */
-.stars {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: -1;
-  overflow: hidden;
-}
-
-/* Star shape */
-.star {
-  position: absolute;
-  border-radius: 50%;
-  background: white;
-  opacity: 0.8;
-  animation: twinkle 2s infinite ease-in-out;
-}
-
-/* Twinkle effect */
-@keyframes twinkle {
-  0%, 100% { opacity: 0.2; transform: scale(0.8); }
-  50%      { opacity: 1; transform: scale(1.2); }
-}
-
-/* Title */
-h1 {
-  font-size: 2.5rem;
-  margin: var(--spacing-lg) 0;
-  background: linear-gradient(90deg, var(--color-accent-blue), var(--color-gradient-start), var(--color-accent-purple));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  font-weight: 800;
-  text-align: center;
-}
-
-/* Card */
-.card {
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: var(--radius-lg);
-  padding: var(--spacing-xl);
-  max-width: 750px;
-  width: 100%;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(15px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  transition: transform 0.3s ease, margin-top 0.5s ease;
-}
-
-.card:hover {
-  transform: translateY(-3px);
-}
-
-/* Input group */
-.input-group {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--spacing-md);
-  justify-content: center;
-  width: 100%;
-  margin-bottom: var(--spacing-md);
-}
-
-input, select, button {
-  border-radius: var(--radius-md);
-  border: 1px solid transparent;
-  font-size: 1rem;
-  padding: var(--spacing-md) var(--spacing-lg);
-  background: var(--color-input-bg);
-  color: var(--color-text);
-  transition: 0.3s;
-}
-
-input:focus, select:focus {
-  border-color: var(--color-accent-blue);
-  background: rgba(255, 255, 255, 0.15);
-}
-
-input, select {
-  flex: 1 1 100%;
-  min-width: 200px;
-}
-
-button {
-  flex: 1 1 100%;
-  cursor: pointer;
-  background: linear-gradient(135deg, var(--color-gradient-start), var(--color-gradient-end));
-  color: white;
-  font-weight: 700;
-  transition: 0.3s;
-}
-
-button:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 25px rgba(37, 99, 235, 0.6);
-}
-
-button:active {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 15px rgba(37, 99, 235, 0.5);
-}
-
-/* Result */
+/* Result Section */
 #result {
   margin-top: var(--spacing-xl);
   min-height: 50px;
@@ -280,6 +276,12 @@ footer span {
 }
 
 /* Responsive */
+@media (max-width: 950px) { /* Sesuaikan media query agar card mulai responsif sebelum 900px */
+  .card {
+    max-width: 90%;
+  }
+}
+
 @media (max-width: 600px) {
   body {
     padding: 1rem;
@@ -292,6 +294,7 @@ footer span {
   .card {
     width: 95%;
     padding: 1rem;
+    max-width: 95%; /* Pastikan responsif pada mobile */
   }
 
   .input-group {
@@ -299,7 +302,21 @@ footer span {
     gap: 0.5rem;
   }
 
-  input, select, button {
+  /* Tombol kembali ke satu kolom dan lebar penuh di layar kecil */
+  .button-group {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .button-group .generate-btn,
+  .button-group .reset-btn {
+    flex: 1 1 100%;
+    max-width: 100%;
+    padding: 0.75rem 1rem;
+    font-size: 0.95rem;
+  }
+
+  input, select {
     width: 100%;
     font-size: 0.95rem;
     padding: 0.75rem 1rem;
@@ -315,3 +332,4 @@ footer span {
     margin-top: 1.5rem;
   }
   }
+  
