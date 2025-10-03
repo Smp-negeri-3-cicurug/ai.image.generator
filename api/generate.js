@@ -1,5 +1,5 @@
 export const config = {
-  runtime: "edge", // biar cepat
+  runtime: "edge",
 };
 
 export default async function handler(req) {
@@ -13,21 +13,23 @@ export default async function handler(req) {
       );
     }
 
-    // Translate prompt ke bahasa Inggris dulu (LibreTranslate)
-    let translatedPrompt = prompt;
+    // Translate prompt ID -> EN
+    let translatedPrompt;
     try {
-      const translateRes = await fetch("https://libretranslate.de/translate", {
+      const translateRes = await fetch("https://de.libretranslate.com/translate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           q: prompt,
-          source: "auto",
+          source: "id",
           target: "en",
-          format: "text"
-        })
+          format: "text",
+          alternatives: 3,
+          api_key: ""
+        }),
       });
       const translateData = await translateRes.json();
-      translatedPrompt = translateData.translatedText || prompt;
+      translatedPrompt = translateData.translatedText || translateData.alternatives[0] || prompt;
     } catch (err) {
       return new Response(
         JSON.stringify({ error: "Failed to translate prompt" }),
@@ -56,7 +58,7 @@ export default async function handler(req) {
       );
     }
 
-    // Forward PNG langsung ke frontend
+    // Forward PNG ke frontend
     return new Response(resp.body, {
       status: 200,
       headers: {
@@ -70,4 +72,4 @@ export default async function handler(req) {
       { status: 500, headers: { "Content-Type": "application/json" } }
     );
   }
-}
+          }
