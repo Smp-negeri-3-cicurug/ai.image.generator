@@ -6,20 +6,27 @@ for (let i = 0; i < numStars; i++) {
   const star = document.createElement("div");
   star.classList.add("star");
 
-  // random size
   const size = Math.random() * 3 + 1;
   star.style.width = `${size}px`;
   star.style.height = `${size}px`;
 
-  // random position
   star.style.top = `${Math.random() * 100}%`;
   star.style.left = `${Math.random() * 100}%`;
 
-  // random animation delay & duration
   star.style.animationDelay = `${Math.random() * 5}s`;
   star.style.animationDuration = `${2 + Math.random() * 3}s`;
 
   starsContainer.appendChild(star);
+}
+
+// Spinner HTML
+function spinnerHTML(message = "Loading...") {
+  return `
+    <div class="spinner-container">
+      <div class="spinner"></div>
+      <div>${message}</div>
+    </div>
+  `;
 }
 
 // AI Image Generator
@@ -40,17 +47,42 @@ async function generate() {
   inputGroup.style.order = "-1";
   inputGroup.style.transition = "all 0.3s ease";
 
-  resultDiv.innerHTML = "<div>Generating image... Tunggu sebentar.</div>";
+  // Step 1: Translating prompt
+  resultDiv.innerHTML = spinnerHTML("Menerjemahkan prompt...");
+
+  let translatedPrompt = prompt;
+  try {
+    const translateRes = await fetch("/api/translate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text: prompt })
+    });
+
+    if (!translateRes.ok) {
+      const text = await translateRes.text();
+      resultDiv.innerHTML = `<div>Error translating prompt</div><div>${text}</div>`;
+      return;
+    }
+
+    const data = await translateRes.json();
+    translatedPrompt = data.translatedText || prompt;
+  } catch (err) {
+    resultDiv.innerHTML = `<div>Error saat translate prompt</div><div>Message: ${err.message}</div>`;
+    return;
+  }
+
+  // Step 2: Generating image
+  resultDiv.innerHTML = spinnerHTML("Generating image...");
 
   try {
     const res = await fetch("/api/generate", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ model, prompt })
+      body: JSON.stringify({ model, prompt: translatedPrompt })
     });
 
     if (!res.ok) {
-      const text = await res.text(); // ambil response dari server
+      const text = await res.text();
       resultDiv.innerHTML = `
         <div>Error generating image</div>
         <div>Status: ${res.status} ${res.statusText}</div>
@@ -68,7 +100,6 @@ async function generate() {
       <a href="${url}" download="ai-image.png" class="download-btn">Download Gambar</a>
     `;
 
-    // Smooth scroll ke hasil gambar
     resultDiv.scrollIntoView({ behavior: "smooth" });
   } catch (err) {
     resultDiv.innerHTML = `
@@ -76,4 +107,4 @@ async function generate() {
       <div>Message: ${err.message}</div>
     `;
   }
-}
+      }
