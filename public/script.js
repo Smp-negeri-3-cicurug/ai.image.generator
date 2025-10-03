@@ -20,6 +20,7 @@ for (let i = 0; i < numStars; i++) {
 }
 
 // === Spinner Helper ===
+// Spinner helper
 function showSpinner(target, text = "Loading...") {
   target.innerHTML = `
     <div class="spinner-container">
