@@ -1,6 +1,6 @@
-export const config = {
-  runtime: "edge",
-};
+import { translateToEnglish } from "./translate";
+
+export const config = { runtime: "edge" };
 
 export default async function handler(req) {
   try {
@@ -13,63 +13,34 @@ export default async function handler(req) {
       );
     }
 
-    // Translate prompt ID -> EN
-    let translatedPrompt;
-    try {
-      const translateRes = await fetch("https://de.libretranslate.com/translate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          q: prompt,
-          source: "id",
-          target: "en",
-          format: "text",
-          alternatives: 3,
-          api_key: ""
-        }),
-      });
-      const translateData = await translateRes.json();
-      translatedPrompt = translateData.translatedText || translateData.alternatives[0] || prompt;
-    } catch (err) {
-      return new Response(
-        JSON.stringify({ error: "Failed to translate prompt" }),
-        { status: 500, headers: { "Content-Type": "application/json" } }
-      );
-    }
+    // Translate prompt dulu ke bahasa Inggris
+    const promptEn = await translateToEnglish(prompt);
 
-    // Panggil API siputzx
-    const targetUrl = `https://api.siputzx.my.id/api/ai/${model}?prompt=${encodeURIComponent(translatedPrompt)}`;
+    // Panggil API Siputzx
+    const targetUrl = `https://api.siputzx.my.id/api/ai/${model}?prompt=${encodeURIComponent(promptEn)}`;
     const resp = await fetch(targetUrl);
 
-    const contentType = resp.headers.get("Content-Type") || "";
     if (!resp.ok) {
       const text = await resp.text();
       return new Response(
-        JSON.stringify({ error: "Failed to fetch image", status: resp.status, body: text }),
+        JSON.stringify({ error: "Failed to fetch image", status: resp.status, response: text }),
         { status: 500, headers: { "Content-Type": "application/json" } }
       );
     }
 
-    if (!contentType.includes("image/png")) {
-      const text = await resp.text();
-      return new Response(
-        JSON.stringify({ error: "API response is not PNG", body: text }),
-        { status: 500, headers: { "Content-Type": "application/json" } }
-      );
-    }
-
-    // Forward PNG ke frontend
+    // Forward gambar langsung (PNG)
     return new Response(resp.body, {
       status: 200,
       headers: {
-        "Content-Type": "image/png",
+        "Content-Type": resp.headers.get("Content-Type") || "image/png",
         "Access-Control-Allow-Origin": "*",
       },
     });
+
   } catch (err) {
     return new Response(
-      JSON.stringify({ error: err.message }),
+      JSON.stringify({ error: "Server error", message: err.message }),
       { status: 500, headers: { "Content-Type": "application/json" } }
     );
   }
-          }
+}
