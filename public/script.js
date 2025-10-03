@@ -19,12 +19,29 @@ for (let i = 0; i < numStars; i++) {
   starsContainer.appendChild(star);
 }
 
-// AI Image Generator with translation animation
+// Function translate via Lingva
+async function translateToEnglish(text) {
+  try {
+    const res = await fetch(
+      "https://lingva.ml/api/v1/id/en/" + encodeURIComponent(text)
+    );
+    if (!res.ok) throw new Error("Failed to translate text");
+
+    const data = await res.json();
+    return data.translation || text;
+  } catch (err) {
+    console.error("Translate Error:", err);
+    return text; // fallback ke text asli
+  }
+}
+
+// AI Image Generator
 async function generate() {
   const promptInput = document.getElementById("prompt");
   const modelSelect = document.getElementById("model");
   const inputGroup = document.querySelector(".input-group");
   const resultDiv = document.getElementById("result");
+
   const prompt = promptInput.value.trim();
   const model = modelSelect.value;
 
@@ -37,18 +54,18 @@ async function generate() {
   inputGroup.style.order = "-1";
   inputGroup.style.transition = "all 0.3s ease";
 
-  // STEP 1: Animasi Translating
+  // Status translate dulu
   resultDiv.innerHTML = "<div>Menerjemahkan prompt...</div>";
-  await new Promise(r => setTimeout(r, 700)); // simulasi delay
+  const translatedPrompt = await translateToEnglish(prompt);
 
-  // STEP 2: Animasi Generating
+  // Status generate
   resultDiv.innerHTML = "<div>Generating image... Tunggu sebentar.</div>";
 
   try {
     const res = await fetch("/api/generate", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ model, prompt })
+      body: JSON.stringify({ model, prompt: translatedPrompt })
     });
 
     if (!res.ok) {
@@ -70,7 +87,6 @@ async function generate() {
       <a href="${url}" download="ai-image.png" class="download-btn">Download Gambar</a>
     `;
 
-    // Smooth scroll ke hasil gambar
     resultDiv.scrollIntoView({ behavior: "smooth" });
   } catch (err) {
     resultDiv.innerHTML = `
@@ -78,4 +94,4 @@ async function generate() {
       <div>Message: ${err.message}</div>
     `;
   }
-  }
+      }
