@@ -1,4 +1,4 @@
-// Generate background stars dynamically
+// === Background Stars ===
 const starsContainer = document.querySelector(".stars");
 const numStars = 120;
 
@@ -19,11 +19,13 @@ for (let i = 0; i < numStars; i++) {
   starsContainer.appendChild(star);
 }
 
-// Spinner helper
+// === Spinner Helper ===
 function showSpinner(target, text = "Loading...") {
   target.innerHTML = `
-    <div class="spinner"></div>
-    <p>${text}</p>
+    <div class="spinner-container">
+      <div class="spinner"></div>
+      <p>${text}</p>
+    </div>
   `;
 }
 
@@ -31,7 +33,7 @@ function hideSpinner(target) {
   target.innerHTML = "";
 }
 
-// Translate via Lingva
+// === Translate Prompt (ID → EN) ===
 async function translateToEnglish(text) {
   try {
     const res = await fetch(
@@ -46,7 +48,7 @@ async function translateToEnglish(text) {
   }
 }
 
-// Generate AI Image
+// === Generate AI Image ===
 async function generate() {
   const promptInput = document.getElementById("prompt");
   const modelSelect = document.getElementById("model");
@@ -56,7 +58,7 @@ async function generate() {
   const model = modelSelect.value;
 
   if (!prompt) {
-    resultDiv.innerHTML = "<div>Prompt tidak boleh kosong.</div>";
+    resultDiv.innerHTML = "<div>⚠ Prompt tidak boleh kosong.</div>";
     return;
   }
 
@@ -78,7 +80,7 @@ async function generate() {
     if (!res.ok) {
       const text = await res.text();
       resultDiv.innerHTML = `
-        <div>Error generating image</div>
+        <div>❌ Error generating image</div>
         <div>Status: ${res.status} ${res.statusText}</div>
         <div>Response: ${text}</div>
       `;
@@ -90,22 +92,24 @@ async function generate() {
 
     resultDiv.innerHTML = `
       <img src="${url}" alt="Generated Image" />
-      <br>
-      <a href="${url}" download="ai-image.png" class="download-btn">Download Gambar</a>
-      <button onclick="resetApp()" class="reset-btn">Reset</button>
+      <a href="${url}" download="ai-image.png" class="download-btn">⬇ Download Gambar</a>
     `;
+
+    // Ubah layout body (atas) setelah generate
+    document.body.classList.add("generated");
 
     resultDiv.scrollIntoView({ behavior: "smooth" });
   } catch (err) {
     resultDiv.innerHTML = `
-      <div>Terjadi error saat fetch API</div>
+      <div>❌ Terjadi error saat fetch API</div>
       <div>Message: ${err.message}</div>
     `;
   }
 }
 
-// Reset app
+// === Reset App ===
 function resetApp() {
   document.getElementById("prompt").value = "";
   document.getElementById("result").innerHTML = "";
-}
+  document.body.classList.remove("generated"); // kembali ke posisi tengah
+    }
