@@ -1,4 +1,6 @@
-export const config = { runtime: "edge" };
+export const config = {
+  runtime: "edge",
+};
 
 export default async function handler(req) {
   try {
@@ -11,25 +13,32 @@ export default async function handler(req) {
       );
     }
 
-    // Step 1: translate prompt
-    const translateRes = await fetch(`${req.url.replace("/generate", "/translate")}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text: prompt })
-    });
+    // STEP 1: Translate prompt ke Inggris
+    let translatedPrompt = prompt;
+    try {
+      const translateRes = await fetch("https://de.libretranslate.com/translate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          q: prompt,
+          source: "id",
+          target: "en",
+          format: "text",
+          api_key: ""
+        }),
+      });
 
-    if (!translateRes.ok) {
-      const text = await translateRes.text();
-      return new Response(
-        JSON.stringify({ error: "Failed to translate prompt", details: text }),
-        { status: 500, headers: { "Content-Type": "application/json" } }
-      );
+      if (!translateRes.ok) throw new Error("Failed to translate text");
+      const data = await translateRes.json();
+      translatedPrompt = data.translatedText || prompt;
+    } catch (err) {
+      console.error("Translate error:", err);
+      // fallback ke prompt asli kalau translate gagal
+      translatedPrompt = prompt;
     }
 
-    const { translatedText } = await translateRes.json();
-
-    // Step 2: call Siputzx API
-    const targetUrl = `https://api.siputzx.my.id/api/ai/${model}?prompt=${encodeURIComponent(translatedText)}`;
+    // STEP 2: Kirim prompt (sudah diterjemahkan) ke Siputzx
+    const targetUrl = `https://api.siputzx.my.id/api/ai/${model}?prompt=${encodeURIComponent(translatedPrompt)}`;
     const resp = await fetch(targetUrl);
 
     if (!resp.ok) {
@@ -40,14 +49,15 @@ export default async function handler(req) {
       );
     }
 
-    // forward image
+    // STEP 3: Forward hasil gambar langsung
     return new Response(resp.body, {
       status: 200,
       headers: {
         "Content-Type": resp.headers.get("Content-Type") || "image/png",
-        "Access-Control-Allow-Origin": "*"
-      }
+        "Access-Control-Allow-Origin": "*",
+      },
     });
+
   } catch (err) {
     return new Response(
       JSON.stringify({ error: err.message }),
