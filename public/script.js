@@ -19,6 +19,16 @@ for (let i = 0; i < numStars; i++) {
   starsContainer.appendChild(star);
 }
 
+// === Spinner Helper ===
+function showSpinner(target, text = "Loading...") {
+  target.innerHTML = `
+    <div class="spinner-container">
+      <div class="spinner"></div>
+      <p>${text}</p>
+    </div>
+  `;
+}
+
 // === Translate Prompt (ID → EN) ===
 async function translateToEnglish(text) {
   try {
@@ -48,14 +58,12 @@ async function generate() {
     return;
   }
 
-  // Tampilkan status
-  resultDiv.innerHTML = "<div>Translating prompt...</div>";
-
-  // Terjemahkan prompt ke Inggris
+  // Spinner saat translate
+  showSpinner(resultDiv, "Translating prompt...");
   const translated = await translateToEnglish(prompt);
 
   // Spinner saat generate
-  resultDiv.innerHTML = "<div>Generating image... Tunggu sebentar.</div>";
+  showSpinner(resultDiv, "Generating image... Tunggu sebentar.");
 
   try {
     const res = await fetch("/api/generate", {
@@ -80,14 +88,12 @@ async function generate() {
     resultDiv.innerHTML = `
       <img src="${url}" alt="Generated Image" />
       <br>
-      <a href="${url}" download="ai-image.png" class="download-btn">⬇ Download Gambar</a>
+      <a href="${url}" download="ai-image.png" class="download-btn">Download Gambar</a>
     `;
 
-    // Scroll halus ke hasil
     resultDiv.scrollIntoView({ behavior: "smooth" });
-
-    // Tambahin class biar card pindah ke atas
     document.body.classList.add("generated");
+
   } catch (err) {
     resultDiv.innerHTML = `
       <div>❌ Terjadi error saat fetch API</div>
@@ -100,7 +106,7 @@ async function generate() {
 function resetApp() {
   document.getElementById("prompt").value = "";
   document.getElementById("result").innerHTML = "";
-  document.body.classList.remove("generated"); // kembalikan card ke tengah
+  document.body.classList.remove("generated");
 }
 
 // === Event Listeners ===
