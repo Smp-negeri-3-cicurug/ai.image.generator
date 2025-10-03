@@ -10,7 +10,7 @@
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="https://files.catbox.moe/k1he1e.jpg" />
 
-  <!-- Open Graph Meta -->
+  <!-- Open Graph -->
   <meta property="og:title" content="✨ AI Image Generator" />
   <meta property="og:description" content="Coba buat gambar AI keren dengan Flux & MagicStudio 🚀" />
   <meta property="og:image" content="https://files.catbox.moe/k1he1e.jpg" />
@@ -28,30 +28,40 @@
 </head>
 <body>
   <!-- Stars Background -->
-  <div class="stars"></div>
+  <div class="stars" aria-hidden="true"></div>
 
-  <h1>✨ AI Image Generator</h1>
+  <main role="main">
+    <h1>✨ AI Image Generator</h1>
 
-  <div class="card">
-    <div class="input-group">
-      <input id="prompt" type="text" placeholder="Masukkan prompt kreatif Anda di sini..." />
-      <select id="model">
-        <option value="flux">Flux</option>
-        <option value="magicstudio">MagicStudio</option>
-      </select>
-      <button onclick="generate()" class="generate-btn">Generate</button>
-      <button onclick="resetForm()" class="reset-btn">Reset</button>
+    <div class="card">
+      <div class="input-group">
+        <input
+          id="prompt"
+          type="text"
+          placeholder="Masukkan prompt kreatif Anda di sini..."
+          autocomplete="off"
+        />
+        <select id="model">
+          <option value="flux">Flux</option>
+          <option value="magicstudio">MagicStudio</option>
+        </select>
+      </div>
+
+      <div class="button-group">
+        <button id="generate-btn" class="generate-btn" type="button">Generate</button>
+        <button id="reset-btn" class="reset-btn" type="button">Reset</button>
+      </div>
+
+      <div id="result"></div>
     </div>
-
-    <div id="result"></div>
-  </div>
+  </main>
 
   <!-- Footer -->
   <footer>
     @Created by <span>Ditzz</span>
   </footer>
 
-  <!-- Script -->
+  <!-- Script eksternal -->
   <script src="script.js"></script>
 </body>
 </html>
