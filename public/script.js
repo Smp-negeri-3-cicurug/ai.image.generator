@@ -19,17 +19,7 @@ for (let i = 0; i < numStars; i++) {
   starsContainer.appendChild(star);
 }
 
-// Spinner HTML
-function spinnerHTML(message = "Loading...") {
-  return `
-    <div class="spinner-container">
-      <div class="spinner"></div>
-      <div>${message}</div>
-    </div>
-  `;
-}
-
-// AI Image Generator
+// AI Image Generator with translation animation
 async function generate() {
   const promptInput = document.getElementById("prompt");
   const modelSelect = document.getElementById("model");
@@ -47,38 +37,18 @@ async function generate() {
   inputGroup.style.order = "-1";
   inputGroup.style.transition = "all 0.3s ease";
 
-  // Step 1: Translating prompt
-  resultDiv.innerHTML = spinnerHTML("Menerjemahkan prompt...");
+  // STEP 1: Animasi Translating
+  resultDiv.innerHTML = "<div>Menerjemahkan prompt...</div>";
+  await new Promise(r => setTimeout(r, 700)); // simulasi delay
 
-  let translatedPrompt = prompt;
-  try {
-    const translateRes = await fetch("/api/translate", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text: prompt })
-    });
-
-    if (!translateRes.ok) {
-      const text = await translateRes.text();
-      resultDiv.innerHTML = `<div>Error translating prompt</div><div>${text}</div>`;
-      return;
-    }
-
-    const data = await translateRes.json();
-    translatedPrompt = data.translatedText || prompt;
-  } catch (err) {
-    resultDiv.innerHTML = `<div>Error saat translate prompt</div><div>Message: ${err.message}</div>`;
-    return;
-  }
-
-  // Step 2: Generating image
-  resultDiv.innerHTML = spinnerHTML("Generating image...");
+  // STEP 2: Animasi Generating
+  resultDiv.innerHTML = "<div>Generating image... Tunggu sebentar.</div>";
 
   try {
     const res = await fetch("/api/generate", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ model, prompt: translatedPrompt })
+      body: JSON.stringify({ model, prompt })
     });
 
     if (!res.ok) {
@@ -100,6 +70,7 @@ async function generate() {
       <a href="${url}" download="ai-image.png" class="download-btn">Download Gambar</a>
     `;
 
+    // Smooth scroll ke hasil gambar
     resultDiv.scrollIntoView({ behavior: "smooth" });
   } catch (err) {
     resultDiv.innerHTML = `
@@ -107,4 +78,4 @@ async function generate() {
       <div>Message: ${err.message}</div>
     `;
   }
-      }
+  }
