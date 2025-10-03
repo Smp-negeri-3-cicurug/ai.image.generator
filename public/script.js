@@ -19,21 +19,6 @@ for (let i = 0; i < numStars; i++) {
   starsContainer.appendChild(star);
 }
 
-// === Spinner Helper ===
-// Spinner helper
-function showSpinner(target, text = "Loading...") {
-  target.innerHTML = `
-    <div class="spinner-container">
-      <div class="spinner"></div>
-      <p>${text}</p>
-    </div>
-  `;
-}
-
-function hideSpinner(target) {
-  target.innerHTML = "";
-}
-
 // === Translate Prompt (ID → EN) ===
 async function translateToEnglish(text) {
   try {
@@ -45,7 +30,7 @@ async function translateToEnglish(text) {
     return data.translation || text;
   } catch (err) {
     console.error("Translate Error:", err);
-    return text; // fallback
+    return text; // fallback ke text asli
   }
 }
 
@@ -59,23 +44,24 @@ async function generate() {
   const model = modelSelect.value;
 
   if (!prompt) {
-    resultDiv.innerHTML = "<div>⚠ Prompt tidak boleh kosong.</div>";
+    resultDiv.innerHTML = "<div>Prompt tidak boleh kosong.</div>";
     return;
   }
 
-  // Spinner saat translate
-  showSpinner(resultDiv, "Translating prompt...");
+  // Tampilkan status
+  resultDiv.innerHTML = "<div>Translating prompt...</div>";
 
+  // Terjemahkan prompt ke Inggris
   const translated = await translateToEnglish(prompt);
 
   // Spinner saat generate
-  showSpinner(resultDiv, "Generating image...");
+  resultDiv.innerHTML = "<div>Generating image... Tunggu sebentar.</div>";
 
   try {
     const res = await fetch("/api/generate", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ model, prompt: translated }),
+      body: JSON.stringify({ model, prompt: translated })
     });
 
     if (!res.ok) {
@@ -93,13 +79,15 @@ async function generate() {
 
     resultDiv.innerHTML = `
       <img src="${url}" alt="Generated Image" />
+      <br>
       <a href="${url}" download="ai-image.png" class="download-btn">⬇ Download Gambar</a>
     `;
 
-    // Ubah layout body (atas) setelah generate
-    document.body.classList.add("generated");
-
+    // Scroll halus ke hasil
     resultDiv.scrollIntoView({ behavior: "smooth" });
+
+    // Tambahin class biar card pindah ke atas
+    document.body.classList.add("generated");
   } catch (err) {
     resultDiv.innerHTML = `
       <div>❌ Terjadi error saat fetch API</div>
@@ -112,5 +100,14 @@ async function generate() {
 function resetApp() {
   document.getElementById("prompt").value = "";
   document.getElementById("result").innerHTML = "";
-  document.body.classList.remove("generated"); // kembali ke posisi tengah
-    }
+  document.body.classList.remove("generated"); // kembalikan card ke tengah
+}
+
+// === Event Listeners ===
+document.addEventListener("DOMContentLoaded", () => {
+  const generateBtn = document.getElementById("generate-btn");
+  const resetBtn = document.getElementById("reset-btn");
+
+  if (generateBtn) generateBtn.addEventListener("click", generate);
+  if (resetBtn) resetBtn.addEventListener("click", resetApp);
+});
