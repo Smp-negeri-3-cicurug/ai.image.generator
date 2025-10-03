@@ -1,6 +1,15 @@
-// translate.js
-export async function translateToEnglish(text) {
+export const config = { runtime: "edge" };
+
+export default async function handler(req) {
   try {
+    const { text } = await req.json();
+    if (!text) {
+      return new Response(
+        JSON.stringify({ error: "Text is required" }),
+        { status: 400, headers: { "Content-Type": "application/json" } }
+      );
+    }
+
     const res = await fetch("https://de.libretranslate.com/translate", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -16,9 +25,15 @@ export async function translateToEnglish(text) {
     if (!res.ok) throw new Error("Failed to translate text");
 
     const data = await res.json();
-    return data.translatedText || text;
+
+    return new Response(
+      JSON.stringify({ translatedText: data.translatedText || text }),
+      { status: 200, headers: { "Content-Type": "application/json" } }
+    );
   } catch (err) {
-    console.error("Translate Error:", err);
-    return text; // fallback ke text asli kalau gagal
+    return new Response(
+      JSON.stringify({ error: err.message }),
+      { status: 500, headers: { "Content-Type": "application/json" } }
+    );
   }
-}
+  }
