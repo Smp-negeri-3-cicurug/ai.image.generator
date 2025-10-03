@@ -19,27 +19,37 @@ for (let i = 0; i < numStars; i++) {
   starsContainer.appendChild(star);
 }
 
-// Function translate via Lingva
+// Spinner helper
+function showSpinner(target, text = "Loading...") {
+  target.innerHTML = `
+    <div class="spinner"></div>
+    <p>${text}</p>
+  `;
+}
+
+function hideSpinner(target) {
+  target.innerHTML = "";
+}
+
+// Translate via Lingva
 async function translateToEnglish(text) {
   try {
     const res = await fetch(
       "https://lingva.ml/api/v1/id/en/" + encodeURIComponent(text)
     );
     if (!res.ok) throw new Error("Failed to translate text");
-
     const data = await res.json();
     return data.translation || text;
   } catch (err) {
     console.error("Translate Error:", err);
-    return text; // fallback ke text asli
+    return text; // fallback
   }
 }
 
-// AI Image Generator
+// Generate AI Image
 async function generate() {
   const promptInput = document.getElementById("prompt");
   const modelSelect = document.getElementById("model");
-  const inputGroup = document.querySelector(".input-group");
   const resultDiv = document.getElementById("result");
 
   const prompt = promptInput.value.trim();
@@ -50,22 +60,19 @@ async function generate() {
     return;
   }
 
-  // Pindahkan input ke atas card
-  inputGroup.style.order = "-1";
-  inputGroup.style.transition = "all 0.3s ease";
+  // Spinner saat translate
+  showSpinner(resultDiv, "Translating prompt...");
 
-  // Status translate dulu
-  resultDiv.innerHTML = "<div>Menerjemahkan prompt...</div>";
-  const translatedPrompt = await translateToEnglish(prompt);
+  const translated = await translateToEnglish(prompt);
 
-  // Status generate
-  resultDiv.innerHTML = "<div>Generating image... Tunggu sebentar.</div>";
+  // Spinner saat generate
+  showSpinner(resultDiv, "Generating image...");
 
   try {
     const res = await fetch("/api/generate", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ model, prompt: translatedPrompt })
+      body: JSON.stringify({ model, prompt: translated }),
     });
 
     if (!res.ok) {
@@ -85,13 +92,20 @@ async function generate() {
       <img src="${url}" alt="Generated Image" />
       <br>
       <a href="${url}" download="ai-image.png" class="download-btn">Download Gambar</a>
+      <button onclick="resetApp()" class="reset-btn">Reset</button>
     `;
 
     resultDiv.scrollIntoView({ behavior: "smooth" });
   } catch (err) {
     resultDiv.innerHTML = `
-      <div>Terjadi error saat proses fetch API</div>
+      <div>Terjadi error saat fetch API</div>
       <div>Message: ${err.message}</div>
     `;
   }
-      }
+}
+
+// Reset app
+function resetApp() {
+  document.getElementById("prompt").value = "";
+  document.getElementById("result").innerHTML = "";
+}
